@@ -1,7 +1,6 @@
 import React from 'react'
 import { Modal } from 'bootstrap'
 import Spinner from '../components/Spinner'
-import ReactPaginate from 'react-paginate'
 
 const API_URI = 'https://60a3502f7c6e8b0017e26af6.mockapi.io/api/v1/employees?page=1&limit=5'
 
@@ -34,19 +33,6 @@ const Tfoot = (props) => {
         <td colSpan="3">
           <div className="d-flex align-items-center">
             <button onClick={() => modal.show()} className="btn btn-secondary me-auto" type="button">+&nbsp;New</button>
-
-            <ReactPaginate
-              previousLabel={'previous'}
-              nextLabel={'next'}
-              breakLabel={'...'}
-              breakClassName={'break-me'}
-              pageCount={50}
-              marginPagesDisplayed={2}
-              pageRangeDisplayed={5}
-              onPageChange={() => {console.log('clicked')}}
-              containerClassName={'pagination'}
-              activeClassName={'active'}
-            />
 
             <nav aria-label="Employees pagination">
               <ul className="pagination mb-0">
@@ -131,7 +117,12 @@ export default function Employees() {
     formData.append('email', email.value)
     formData.append('position', position.value)
 
-    console.log(formData)
+    fetch(API_URI, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
   }
 
   const handleNameInput = (e) => {
