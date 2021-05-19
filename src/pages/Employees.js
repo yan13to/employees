@@ -1,8 +1,9 @@
 import React from 'react'
 import { Modal } from 'bootstrap'
+import Pagination from '../components/Pagination'
 import Spinner from '../components/Spinner'
 
-const API_URI = 'https://60a3502f7c6e8b0017e26af6.mockapi.io/api/v1/employees?page=1&limit=5'
+const API_URI = 'https://60a3502f7c6e8b0017e26af6.mockapi.io/api/v1/employees'
 
 const TableData = (props) => {
   return props.data?.map((d, i) => {
@@ -25,7 +26,12 @@ const TableLoader = () => {
 }
 
 const Tfoot = (props) => {
-  const { modal } = props
+  const { modal, processor } = props
+
+  const handlePageChanged = data => {
+    console.log(data)
+    // processor(data.currentPage, data.pageLimit)
+  }
 
   return (
     <tfoot>
@@ -33,30 +39,12 @@ const Tfoot = (props) => {
         <td colSpan="3">
           <div className="d-flex align-items-center">
             <button onClick={() => modal.show()} className="btn btn-secondary me-auto" type="button">+&nbsp;New</button>
-
-            <nav aria-label="Employees pagination">
-              <ul className="pagination mb-0">
-                <li className="page-item">
-                  <a className="page-link" href="/" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                  </a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="/">1</a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="/2">2</a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="/3">3</a>
-                </li>
-                <li className="page-item">
-                  <a className="page-link" href="/" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+            <Pagination
+              totalRecords={52}
+              pageLimit={5}
+              pageNeighbours={1}
+              onPageChanged={handlePageChanged}
+            />
           </div>
         </td>
       </tr>
@@ -85,7 +73,7 @@ export default function Employees() {
     const modalin = document.getElementById('modalin')
 
     modalin.addEventListener('show.bs.modal', (e) => {
-      console.log('show')
+      console.log('modal show')
     })
 
     modalin.addEventListener('hide.bs.modal', (e) => {
@@ -95,16 +83,18 @@ export default function Employees() {
       setPosition(defaultState)
     })
   }, [])
-  React.useEffect(() => {
+  React.useEffect(() => fetchEmployees(), [])
+
+  const fetchEmployees = (page=1, limit=5) => {
     setIsLoading(true)
 
-    fetch(API_URI)
+    fetch(`${API_URI}?page=${page}&limit=${limit}`)
       .then(response => response.json())
       .then(data => {
         setEmployees(data)
         setIsLoading(false)
       })
-  }, [])
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -176,7 +166,7 @@ export default function Employees() {
           <tbody>
             {isLoading ? <TableLoader /> : <TableData data={employees} />}
           </tbody>
-          { !isLoading && <Tfoot modal={modal} /> }
+          {!isLoading && <Tfoot modal={modal} processor={fetchEmployees} />}
         </table>
       </div>
 
